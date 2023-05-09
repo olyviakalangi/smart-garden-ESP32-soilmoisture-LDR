@@ -129,7 +129,6 @@ void setup(void) {
 
   server.begin();
   Serial.println("HTTP server started");
-  dht.begin();
   delay(2000);
 
 // Initialize a NTPClient to get time
