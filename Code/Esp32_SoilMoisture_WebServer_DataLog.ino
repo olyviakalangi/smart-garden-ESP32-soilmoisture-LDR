@@ -32,14 +32,6 @@ WebServer server(port);
 
 const int led = LED_BUILTIN;
 
-//DHT11 things
-#include "DHT.h"
-#define DHTPIN 22
-#define DHTTYPE DHT11
-DHT dht(DHTPIN, DHTTYPE);
-float hum = dht.readHumidity();
-float temp = dht.readTemperature();
-
 //Other things
 float asoilmoist=analogRead(32);//global variable to store exponential smoothed soil moisture reading
 
@@ -179,8 +171,6 @@ void loop(void) {
     }
     else{
       asoilmoist=0.99*asoilmoist+0.01*analogRead(32);//exponential smoothing of soil moisture
-      hum = dht.readHumidity();
-      temp = dht.readTemperature();
       server.handleClient();
     }  
   } 
