@@ -12,12 +12,8 @@ int port=80;
 WebServer server(port);
 
 const int led = LED_BUILTIN;
-
-//DHT11 things
-#include "DHT.h"
-#define DHTPIN 22
-#define DHTTYPE DHT11
-DHT dht(DHTPIN, DHTTYPE);
+int sensorSoil = A0;
+int sensorLDR = A1;
 
 //Other things
 float asoilmoist=analogRead(32);//global variable to store exponential smoothed soil moisture reading
@@ -28,11 +24,6 @@ void handleRoot() {
   int sec = millis() / 1000;
   int min = sec / 60;
   int hr = min / 60;
-  // Reading temperature or humidity takes about 250 milliseconds!
-  // Sensor readings may also be up to 2 seconds 'old' (its a very slow sensor)
-  float hum = dht.readHumidity();
-  // Read temperature as Celsius (the default)
-  float temp = dht.readTemperature();
 
   // Check if any reads failed and exit early (to try again).
   if (isnan(hum) || isnan(temp)) {
@@ -121,6 +112,36 @@ void setup(void) {
 }
 
 void loop(void) {
-  asoilmoist=0.95*asoilmoist+0.05*analogRead(32);//exponential smoothing of soil moisture
+  int dataAnalog = analogRead (A0);  //inisialisasi dataAnalog sebagai baca sensor pada pin analog A0
+  long nilaiTerendah  = 0;          
+  long nilaiTertinggi = 1023;        
+  long persentase;
+  
+  Serial.println(dataAnalog);       //Jika ingin melihat melalui serial monitor
+  persentase = map(dataAnalog, nilaiTerendah, nilaiTertinggi, 0, 100);  //Membuat nilai analog menjadi digital
+  Serial.println(persentase);
+
+  //Cetak tulisan dan persentase kekeringan
+  lcd.setCursor(0,0);
+  lcd.print("Kekeringan: ");
+  lcd.print(persentase);
+  lcd.print("%");
+
+  if(dataAnalog>=870)               //Relay Digital (2 output: ON/OFF; Indikator 0 = Basah dan 1 = Kering
+  {
+    lcd.setCursor(0,1);
+    lcd.print("= Media Kering =");
+  }
+  else if(dataAnalog>=500 && dataAnalog<=850)          //Relay Digital (2 output: ON/OFF; Indikator 0 = Basah dan 1 = Kering
+  {
+    lcd.setCursor(0,1);
+    lcd.print("= Media Medium =");
+  }
+  else if(dataAnalog<=450)
+  {
+    lcd.setCursor(0,1);
+    lcd.print("= Media  Basah =");
+  }
+  
   server.handleClient(); 
 }
